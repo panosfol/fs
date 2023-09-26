@@ -1,0 +1,13 @@
+# Cmake
+CMakeLists.txt
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+filesystem
+Makefile
+
+# Executables
+.out
+
+# Emacs
+*~
