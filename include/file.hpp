@@ -9,17 +9,17 @@ class File {
 protected:
   std::string name;
   std::string content;
-  const time_t date_of_creation;
+  const char *date_of_creation;
   const filetype type;
   int size;
 
 public:
-  File(std::string, time_t date, filetype file_type);
+  File(std::string, filetype file_type);
 
   std::string getName();
   void setName(std::string);
 
-  time_t getDate();
+  const char *getDate();
 
   filetype getType();
 

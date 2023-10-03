@@ -1,13 +1,16 @@
 #include "file.hpp"
 
-File::File(std::string name, time_t date, filetype type)
-    : name(name), date_of_creation(date), type(type) {}
+File::File(std::string name, filetype type) : name(name), type(type) {
+  time_t now = time(0);
+  char *dt = ctime(&now);
+  this->date_of_creation = dt;
+}
 
 std::string File::getName() { return this->name; }
 
 void File::setName(std::string name) { this->name = name; }
 
-time_t File::getDate() { return this->date_of_creation; }
+const char *File::getDate() { return this->date_of_creation; }
 
 filetype File::getType() { return this->type; }
 
