@@ -12,9 +12,14 @@ protected:
   int size_of_contents;
 
 public:
-  using File::File;
+  Directory(std::string, filetype type);
+
   File *getContent(std::string);
   void insertContent(std::string, File *);
+
   void listContents();
+
+  int getNumContents();
+  int getSizeOfContents();
 };
 #endif
