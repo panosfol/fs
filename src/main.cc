@@ -5,7 +5,10 @@
 #include "root.hpp"
 
 int main() {
-  std::cout << "Hello, World!" << std::endl;
+  Root *root = new Root();
+
+  root->main_loop();
+  delete (root);
 
   return 0;
 }
