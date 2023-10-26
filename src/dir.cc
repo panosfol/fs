@@ -1,22 +1,14 @@
 #include "dir.hpp"
 
-Directory::Directory(std::string name, filetype type) : name(name), type(type) {
+Directory::Directory(std::string name, filetype type) : FileObject(name, type) {
   time_t now = time(0);
   this->date_of_creation = ctime(&now);
   this->num_of_contents = 0;
   this->size_of_contents = 0;
 };
 
-std::string Directory::getName() { return this->name; }
-
-void Directory::setName(std::string name) { this->name = name; }
-
-std::string Directory::getDate() { return this->date_of_creation; }
-
-filetype Directory::getType() { return this->type; }
-
-File *Directory::getContent(std::string name) {
-  std::unordered_map<std::string, File *>::iterator it =
+FileObject *Directory::findOneContent(std::string name) {
+  std::unordered_map<std::string, FileObject *>::iterator it =
       this->contents.find(name);
   if (it == contents.end()) {
     std::cout << "file not found" << std::endl;
@@ -25,7 +17,11 @@ File *Directory::getContent(std::string name) {
     return it->second;
 };
 
-void Directory::insertContent(std::string name, File *file) {
+std::unordered_map<std::string, FileObject *> Directory::getContents() {
+  return this->contents;
+}
+
+void Directory::insertContent(std::string name, FileObject *file) {
   this->contents.insert({name, file});
   this->num_of_contents++;
 }
