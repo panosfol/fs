@@ -2,15 +2,14 @@
 
 File::File(std::string name, filetype type) : name(name), type(type) {
   time_t now = time(0);
-  char *dt = ctime(&now);
-  this->date_of_creation = dt;
+  this->date_of_creation = ctime(&now);
 }
 
 std::string File::getName() { return this->name; }
 
 void File::setName(std::string name) { this->name = name; }
 
-const char *File::getDate() { return this->date_of_creation; }
+std::string File::getDate() { return this->date_of_creation; }
 
 filetype File::getType() { return this->type; }
 
