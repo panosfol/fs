@@ -1,4 +1,4 @@
-# file-system
+# FS
 A simulated file-system written in C++
 
 ## Summary
