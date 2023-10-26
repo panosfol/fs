@@ -1,27 +1,31 @@
 #include <sstream>
 
-#include "root.hpp"
+#include "fs.hpp"
 
-Root::Root() { this->current_path = "~/home"; }
+FS::FS() {
+  Directory *root_dir = new Directory("/", filetype::FSDIRECTORY);
+  this->current_path = root_dir->getName();
+  this->current_dir = root_dir;
+}
 
-void Root::main_loop() {
+void FS::main_loop() {
   while (1) {
     std::cout << "file-system:" << this->current_path << "$ ";
-    if (this->parse_string()) {
+    if (this->parse_command()) {
       execute_command(this->command);
     }
   }
 }
 
-bool Root::parse_string() {
-  std::string unparsed_string;
+bool FS::parse_command() {
+  std::string unparsed_command;
   std::string word;
 
-  std::getline(std::cin, unparsed_string);
-  std::stringstream ss(unparsed_string);
+  std::getline(std::cin, unparsed_command);
+  std::stringstream ss(unparsed_command);
 
-  // Get the first word of the unparsed string and check if its a valid command.
-  // If it's not we dont need to continue with parsing.
+  // Get the first word of the unparsed string and check if it's a valid
+  // command. If it's not we dont need to continue with parsing.
   ss >> word;
 
   if (word == "cd") {
@@ -63,7 +67,7 @@ bool Root::parse_string() {
 }
 
 // This is just the basic structure until the commands are fully implemented
-void Root::execute_command(commands command) {
+void FS::execute_command(commands command) {
   switch (command) {
   case commands::CD:
     break;

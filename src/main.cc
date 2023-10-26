@@ -2,13 +2,13 @@
 
 #include "dir.hpp"
 #include "file.hpp"
-#include "root.hpp"
+#include "fs.hpp"
 
 int main() {
-  Root *root = new Root();
+  FS *fs = new FS();
 
-  root->main_loop();
-  delete (root);
+  fs->main_loop();
+  delete (fs);
 
   return 0;
 }

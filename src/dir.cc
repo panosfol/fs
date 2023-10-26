@@ -1,9 +1,19 @@
 #include "dir.hpp"
 
-Directory::Directory(std::string name, filetype type) : File(name, type) {
+Directory::Directory(std::string name, filetype type) : name(name), type(type) {
+  time_t now = time(0);
+  this->date_of_creation = ctime(&now);
   this->num_of_contents = 0;
   this->size_of_contents = 0;
 };
+
+std::string Directory::getName() { return this->name; }
+
+void Directory::setName(std::string name) { this->name = name; }
+
+std::string Directory::getDate() { return this->date_of_creation; }
+
+filetype Directory::getType() { return this->type; }
 
 File *Directory::getContent(std::string name) {
   std::unordered_map<std::string, File *>::iterator it =

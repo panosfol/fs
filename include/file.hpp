@@ -19,7 +19,7 @@ public:
   std::string getName();
   void setName(std::string);
 
-  const char *getDate();
+  std::string getDate();
 
   filetype getType();
 

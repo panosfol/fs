@@ -1,5 +1,5 @@
-#ifndef ROOT_H_NAME
-#define ROOT_H_NAME
+#ifndef FS_H_NAME
+#define FS_H_NAME
 
 #include <iostream>
 #include <unordered_map>
@@ -24,16 +24,13 @@ enum commands {
   ERROR
 };
 
-class Root {
-protected:
-  std::unordered_map<std::string, File *> contents;
-
+class FS {
 public:
-  Root();
+  FS();
 
   void main_loop();
 
-  bool parse_string();
+  bool parse_command();
   void execute_command(commands);
 
   std::string file_search();
