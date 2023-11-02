@@ -1,3 +1,4 @@
+#include <boost/serialization/serialization.hpp>
 #include <sstream>
 
 #include "fs.hpp"
@@ -94,4 +95,22 @@ void FS::execute_command(commands command) {
   case commands::HELP:
     break;
   }
+}
+
+void FS::save_state(const Directory &s, const char *filename) {
+  // make an archive
+  std::ofstream ofs(filename);
+  assert(ofs.good());
+  boost::archive::xml_oarchive oa(ofs);
+  oa << BOOST_NVP(s);
+}
+
+void FS::restore_state(Directory &s, const char *filename) {
+  // open the archive
+  std::ifstream ifs(filename);
+  assert(ifs.good());
+  boost::archive::xml_iarchive ia(ifs);
+
+  // restore the schedule from the archive
+  ia >> BOOST_NVP(s);
 }

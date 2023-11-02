@@ -3,7 +3,7 @@
 FileObject::FileObject(std::string name, filetype type)
     : name(name), type(type){};
 
-std::string FileObject::getName() { return this->name; };
+std::string FileObject::getName() const { return this->name; };
 
 void FileObject::setName(std::string name) { this->name = name; };
 

@@ -7,28 +7,34 @@ Directory::Directory(std::string name, filetype type) : FileObject(name, type) {
   this->size_of_contents = 0;
 };
 
-FileObject *Directory::findOneContent(std::string name) {
-  std::unordered_map<std::string, FileObject *>::iterator it =
+std::unique_ptr<FileObject> Directory::findOneContent(std::string name) {
+  std::unordered_map<std::string, std::unique_ptr<FileObject>>::iterator it =
       this->contents.find(name);
   if (it == contents.end()) {
     std::cout << "file not found" << std::endl;
     return NULL;
   } else
-    return it->second;
+    return std::move(it->second);
 };
 
-std::unordered_map<std::string, FileObject *> Directory::getContents() {
+std::unordered_map<std::string, std::unique_ptr<FileObject>> &
+Directory::getContents() {
   return this->contents;
 }
 
-void Directory::insertContent(std::string name, FileObject *file) {
-  this->contents.insert({name, file});
+void Directory::insertContent(std::unique_ptr<FileObject> object) {
+  this->contents.emplace(object->getName(), std::move(object));
+  this->num_of_contents++;
+}
+
+void Directory::insertContent(std::unique_ptr<Directory> object) {
+  this->contents.emplace(object->getName(), std::move(object));
   this->num_of_contents++;
 }
 
 void Directory::listContents() {
   for (auto it = this->contents.begin(); it != this->contents.end(); it++) {
-    std::cout << it->first << std::endl;
+    std::cout << it->second->getName() << std::endl;
   }
 }
 
