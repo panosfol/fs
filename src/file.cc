@@ -1,17 +1,9 @@
 #include "file.hpp"
 
-File::File(std::string name, filetype type) : name(name), type(type) {
+File::File(std::string name, filetype type) : FileObject(name, type) {
   time_t now = time(0);
   this->date_of_creation = ctime(&now);
 }
-
-std::string File::getName() { return this->name; }
-
-void File::setName(std::string name) { this->name = name; }
-
-std::string File::getDate() { return this->date_of_creation; }
-
-filetype File::getType() { return this->type; }
 
 void File::setSize(int size) { this->size = size; }
 
