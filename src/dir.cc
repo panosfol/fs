@@ -22,14 +22,11 @@ Directory::getContents() {
   return this->contents;
 }
 
-void Directory::insertContent(std::unique_ptr<FileObject> object) {
-  this->contents.emplace(object->getName(), std::move(object));
-  this->num_of_contents++;
-}
-
 void Directory::insertContent(std::unique_ptr<Directory> object) {
-  this->contents.emplace(object->getName(), std::move(object));
-  this->num_of_contents++;
+  auto [it, ok] = this->contents.emplace(object->getName(), std::move(object));
+  if (ok) {
+    this->num_of_contents++;
+  }
 }
 
 void Directory::listContents() {
