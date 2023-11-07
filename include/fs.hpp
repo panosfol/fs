@@ -5,9 +5,6 @@
 #include <boost/archive/xml_iarchive.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <fstream>
-#include <iostream>
-#include <unordered_map>
-#include <vector>
 
 #include "dir.hpp"
 
