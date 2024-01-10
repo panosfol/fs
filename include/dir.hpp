@@ -20,6 +20,8 @@
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/unordered_map.hpp>
 
+#define ROOT "FileSystem Root Directory"
+
 class Directory : public FileObject {
 private:
         friend class boost::serialization::access;
@@ -30,14 +32,15 @@ private:
                     BOOST_NVP(contents);
         }
 
-protected:
         std::unordered_map<std::string, std::unique_ptr<FileObject>> contents;
         int num_of_contents;
         int size_of_contents;
+        bool visible;
 
 public:
         Directory() = default; // for deserialization
-        Directory(std::string, filetype type);
+        Directory(std::string, filetype type, Directory *parent_dir,
+                  bool visibility);
 
         std::unique_ptr<FileObject> findOneContent(std::string name);
         std::unordered_map<std::string, std::unique_ptr<FileObject>> &
@@ -46,8 +49,9 @@ public:
         void insertContent(std::unique_ptr<FileObject> object);
 
         void listContents();
-
         int getNumContents();
         int getSizeOfContents();
+
+        int checkDirName(std::string);
 };
 #endif

@@ -1,10 +1,13 @@
 #include "dir.hpp"
 
-Directory::Directory(std::string name, filetype type) : FileObject(name, type) {
+Directory::Directory(std::string name, filetype type, Directory *parent_dir,
+                     bool visibility)
+    : FileObject(name, type) {
         time_t now = time(0);
         this->date_of_creation = ctime(&now);
         this->num_of_contents = 0;
         this->size_of_contents = 0;
+        this->parent_dir = parent_dir;
 };
 
 std::unique_ptr<FileObject> Directory::findOneContent(std::string name) {
@@ -40,3 +43,32 @@ void Directory::listContents() {
 int Directory::getNumContents() { return this->num_of_contents; }
 
 int Directory::getSizeOfContents() { return this->size_of_contents; }
+
+/*
+ *  checkDirName
+ *  Check if the given string is appropriate for a directory
+ *  in accordance to the Linux specification
+ *
+ * Returns:
+ *  0 Success
+ * -1 Failure - Name not allowed
+ *
+ */
+int Directory::checkDirName(std::string name) {
+        // 255 is the maximum length of a name for a directory that Linux allows
+        if (name.length() > 255) {
+                std::cerr << "mkdir: cannot create directory ‘" << name
+                          << "’: File name too long" << std::endl;
+                return -1;
+        }
+
+        // Check if the directory already exists
+        for (auto &[key, value] : this->contents) {
+                if (name == key) {
+                        std::cerr << "mkdir: cannot create directory ‘" << name
+                                  << "’: File exists" << std::endl;
+                        return -1;
+                }
+        }
+        return 0;
+};

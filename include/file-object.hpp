@@ -9,6 +9,11 @@
 #include <boost/serialization/library_version_type.hpp>
 #endif
 
+#define ROOT "FileSystem Root Directory"
+  
+// Forward declaration of Directory class to be used in the FileObject class
+class Directory;
+
 // The different type of files that are supported
 enum filetype { FSFILE, FSDIRECTORY };
 
@@ -24,6 +29,8 @@ protected:
         std::string name;
         std::string date_of_creation;
         filetype type;
+	Directory *parent_dir;
+	std::string absolute_path;
 
 public:
         FileObject() = default; // for deserialization
@@ -33,6 +40,13 @@ public:
 
         std::string getName() const;
         void setName(std::string);
+
+	void setAbsolutePath(std::string, std::string);
+        void setAbsolutePath(std::string);
+        std::string getAbsolutePath();
+
+        void setParentDir(Directory *);
+        Directory *getParentDir();
 
         std::string getDate();
 
