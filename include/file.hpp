@@ -18,25 +18,26 @@
 
 class File : public FileObject {
 private:
-  friend class boost::serialization::access;
+        friend class boost::serialization::access;
 
-  template <class Archive> void serialize(Archive &ar, const unsigned int) {
-    ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FileObject);
-    ar &BOOST_NVP(content);
-    ar &BOOST_NVP(size);
-  }
+        template <class Archive>
+        void serialize(Archive &ar, const unsigned int) {
+                ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FileObject);
+                ar &BOOST_NVP(content);
+                ar &BOOST_NVP(size);
+        }
 
 protected:
-  std::string content;
-  int size;
+        std::string content;
+        int size;
 
 public:
-  File(){};
-  File(std::string, filetype file_type);
+        File(){};
+        File(std::string, filetype file_type);
 
-  void setSize(int);
-  int getSize();
+        void setSize(int);
+        int getSize();
 
-  // TODO methods for creating and reading content
+        // TODO methods for creating and reading content
 };
 #endif
