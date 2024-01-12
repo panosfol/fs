@@ -14,27 +14,28 @@ enum filetype { FSFILE, FSDIRECTORY };
 
 class FileObject {
 private:
-  friend class boost::serialization::access;
-  template <class Ar> void serialize(Ar &ar, unsigned) {
-    ar &BOOST_NVP(name) & BOOST_NVP(date_of_creation) & BOOST_NVP(type);
-  }
+        friend class boost::serialization::access;
+        template <class Ar> void serialize(Ar &ar, unsigned) {
+                ar &BOOST_NVP(name) & BOOST_NVP(date_of_creation) &
+                    BOOST_NVP(type);
+        }
 
 protected:
-  std::string name;
-  std::string date_of_creation;
-  filetype type;
+        std::string name;
+        std::string date_of_creation;
+        filetype type;
 
 public:
-  FileObject() = default; // for deserialization
-  FileObject(std::string, filetype);
+        FileObject() = default; // for deserialization
+        FileObject(std::string, filetype);
 
-  virtual ~FileObject() = default;
+        virtual ~FileObject() = default;
 
-  std::string getName() const;
-  void setName(std::string);
+        std::string getName() const;
+        void setName(std::string);
 
-  std::string getDate();
+        std::string getDate();
 
-  filetype getType();
+        filetype getType();
 };
 #endif

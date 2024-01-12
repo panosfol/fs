@@ -12,10 +12,10 @@ BOOST_CLASS_EXPORT(File)
 BOOST_CLASS_EXPORT(Directory)
 
 int main() {
-  FS *fs = new FS();
-  fs->main_loop();
+        FS *fs = new FS();
+        fs->main_loop();
 
-  delete (fs);
+        delete (fs);
 
-  return 0;
+        return 0;
 }

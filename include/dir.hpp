@@ -22,31 +22,32 @@
 
 class Directory : public FileObject {
 private:
-  friend class boost::serialization::access;
+        friend class boost::serialization::access;
 
-  template <class Ar> void serialize(Ar &ar, unsigned) {
-    ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FileObject) &
-	BOOST_NVP(num_of_contents) & BOOST_NVP(size_of_contents) &
-	BOOST_NVP(contents);
-  }
+        template <class Ar> void serialize(Ar &ar, unsigned) {
+                ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FileObject) &
+                    BOOST_NVP(num_of_contents) & BOOST_NVP(size_of_contents) &
+                    BOOST_NVP(contents);
+        }
 
 protected:
-  std::unordered_map<std::string, std::unique_ptr<FileObject>> contents;
-  int num_of_contents;
-  int size_of_contents;
+        std::unordered_map<std::string, std::unique_ptr<FileObject>> contents;
+        int num_of_contents;
+        int size_of_contents;
 
 public:
-  Directory() = default; // for deserialization
-  Directory(std::string, filetype type);
+        Directory() = default; // for deserialization
+        Directory(std::string, filetype type);
 
-  std::unique_ptr<FileObject> findOneContent(std::string name);
-  std::unordered_map<std::string, std::unique_ptr<FileObject>> &getContents();
-  void insertContent(std::unique_ptr<Directory> object);
-  void insertContent(std::unique_ptr<FileObject> object);
+        std::unique_ptr<FileObject> findOneContent(std::string name);
+        std::unordered_map<std::string, std::unique_ptr<FileObject>> &
+        getContents();
+        void insertContent(std::unique_ptr<Directory> object);
+        void insertContent(std::unique_ptr<FileObject> object);
 
-  void listContents();
+        void listContents();
 
-  int getNumContents();
-  int getSizeOfContents();
+        int getNumContents();
+        int getSizeOfContents();
 };
 #endif
