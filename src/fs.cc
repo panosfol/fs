@@ -9,7 +9,7 @@
 FS::FS() {
         // The root directory doesn't have a parent directory, therefore we use
         // nullptr.
-        this->root_dir = Directory(ROOT, filetype::FSDIRECTORY, nullptr, false);
+        this->root_dir = Directory(ROOT, filetype::FSDIRECTORY, nullptr);
         this->root_dir.setAbsolutePath("/");
 
         this->current_path = this->root_dir.getAbsolutePath();
@@ -91,7 +91,7 @@ void FS::executeCommand() {
                 this->changeDir();
                 break;
         case commands::LS:
-                this->current_dir->listContents();
+                this->listDirContents();
                 break;
         case commands::MKDIR:
                 this->createDirectory();
@@ -156,7 +156,7 @@ void FS::createDirectory() {
         }
 
         std::unique_ptr<Directory> dir = std::make_unique<Directory>(
-            dir_name, filetype::FSDIRECTORY, temp_dir, true);
+            dir_name, filetype::FSDIRECTORY, temp_dir);
         dir->setAbsolutePath(dir->getParentDir()->getAbsolutePath(), dir_name);
         temp_dir->insertContent(std::move(dir));
 }
@@ -323,5 +323,24 @@ std::string FS::fetchCommand() {
                 return "help";
         default:
                 return "default";
+        }
+}
+
+void FS::listDirContents() {
+        if (this->command_arguments.empty()) {
+                this->current_dir->listContents();
+                return;
+        } else {
+                std::string path_to_dir = command_arguments.front();
+                Directory *dir = findDirPath(path_to_dir);
+                if (dir == nullptr) {
+                        std::cerr << this->fetchCommand() << ": cannot access '"
+                                  << path_to_dir
+                                  << "': No such file or directory"
+                                  << std::endl;
+                } else {
+                        dir->listContents();
+                }
+                return;
         }
 }

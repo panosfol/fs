@@ -29,18 +29,16 @@ private:
         template <class Ar> void serialize(Ar &ar, unsigned) {
                 ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FileObject) &
                     BOOST_NVP(num_of_contents) & BOOST_NVP(size_of_contents) &
-                    BOOST_NVP(contents) & BOOST_NVP(visible);
+                    BOOST_NVP(contents);
         }
 
         std::unordered_map<std::string, std::unique_ptr<FileObject>> contents;
         int num_of_contents;
         int size_of_contents;
-        bool visible;
 
 public:
         Directory() = default; // for deserialization
-        Directory(std::string, filetype type, Directory *parent_dir,
-                  bool visibility);
+        Directory(std::string, filetype type, Directory *parent_dir);
 
         std::unique_ptr<FileObject> findOneContent(std::string name);
         std::unordered_map<std::string, std::unique_ptr<FileObject>> &

@@ -61,6 +61,8 @@ public:
         Directory *findDirPath(std::string path_to_dir);
         void changeDir();
 
+        void listDirContents();
+
         std::vector<std::string> command_arguments;
         commands command;
 

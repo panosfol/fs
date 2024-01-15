@@ -1,7 +1,6 @@
 #include "dir.hpp"
 
-Directory::Directory(std::string name, filetype type, Directory *parent_dir,
-                     bool visibility)
+Directory::Directory(std::string name, filetype type, Directory *parent_dir)
     : FileObject(name, type) {
         time_t now = time(0);
         this->date_of_creation = ctime(&now);
