@@ -88,6 +88,7 @@ bool FS::parseCommand() {
 void FS::executeCommand() {
         switch (this->command) {
         case commands::CD:
+                this->changeDir();
                 break;
         case commands::LS:
                 this->current_dir->listContents();
@@ -156,7 +157,7 @@ void FS::createDirectory() {
 
         std::unique_ptr<Directory> dir = std::make_unique<Directory>(
             dir_name, filetype::FSDIRECTORY, temp_dir, true);
-        dir->setAbsolutePath(this->current_path, dir_name);
+        dir->setAbsolutePath(dir->getParentDir()->getAbsolutePath(), dir_name);
         temp_dir->insertContent(std::move(dir));
 }
 
@@ -212,7 +213,7 @@ Directory *FS::findDirPath(std::string path_to_dir, std::string &name) {
                                 }
                         }
                         if (!found) {
-                                std::cerr << "mkdir: " << path_to_dir
+                                std::cerr << this->fetchCommand() << path_to_dir
                                           << " No such file or directory"
                                           << std::endl;
                                 return nullptr;
@@ -221,4 +222,106 @@ Directory *FS::findDirPath(std::string path_to_dir, std::string &name) {
         }
 
         return temp_dir;
+}
+
+Directory *FS::findDirPath(std::string path_to_dir) {
+        bool found;
+        Directory *temp_dir;
+        std::vector<std::string> temp_vector;
+        boost::char_separator<char> sep("/");
+        boost::tokenizer tok(path_to_dir, sep);
+
+        /*
+         * If the given path starts with '/' we should start searching from the
+         * root directory, if not then we start from the current.
+         */
+        if (path_to_dir.at(0) == '/') {
+                temp_dir = (Directory *)&this->root_dir;
+        } else {
+                temp_dir = (Directory *)this->current_dir;
+        }
+
+        for (auto it = tok.begin(); it != tok.end(); ++it) {
+                if (*it == "..") {
+                        Directory *parent_dir = temp_dir->getParentDir();
+                        if (parent_dir == nullptr) {
+                                continue;
+                        } else {
+                                temp_dir = parent_dir;
+                                continue;
+                        }
+                } else if (*it == ".") {
+                        continue;
+                } else {
+                        found = false;
+                        std::unordered_map<std::string,
+                                           std::unique_ptr<FileObject>>
+                            &contents = temp_dir->getContents();
+                        for (auto &[key, value] : contents) {
+                                if (key == *it) {
+                                        temp_dir = (Directory *)value.get();
+                                        found = true;
+                                        break;
+                                }
+                        }
+                        if (!found) {
+                                std::cerr << this->fetchCommand() << " "
+                                          << path_to_dir
+                                          << ": No such file or directory"
+                                          << std::endl;
+                                return nullptr;
+                                break;
+                        }
+                }
+        }
+
+        return temp_dir;
+}
+
+void FS::changeDir() {
+        // if the command argument is empty, we just change to root directory.
+        if (this->command_arguments.empty()) {
+                this->current_path = this->root_dir.getAbsolutePath();
+                this->current_dir = &this->root_dir;
+                return;
+        }
+
+        std::string path = this->command_arguments.front();
+        Directory *target_dir = findDirPath(path);
+        if (target_dir == NULL) {
+                return;
+        }
+        this->current_path = target_dir->getAbsolutePath();
+        this->current_dir = target_dir;
+}
+
+std::string FS::fetchCommand() {
+        switch (this->command) {
+        case commands::CD:
+                return "cd";
+        case commands::LS:
+                return "ls";
+        case commands::MKDIR:
+                return "mkdir";
+        case commands::TOUCH:
+                return "touch";
+        case commands::RM:
+                return "rm";
+        case commands::MV:
+                return "mv";
+        case commands::CP:
+                return "cp";
+        case commands::CAT:
+                return "cat";
+        case commands::FIND:
+                return "find";
+        case commands::INFO:
+                return "info";
+        case commands::EXIT:
+                return "exit";
+        case commands::HELP:
+                return "help";
+        default:
+                return "default";
+        }
 }
