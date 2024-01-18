@@ -1,6 +1,7 @@
 #include "file.hpp"
 
-File::File(std::string name, filetype type) : FileObject(name, type) {
+File::File(std::string name, filetype type, Directory *parent_dir)
+    : FileObject(name, type, parent_dir) {
         time_t now = time(0);
         this->date_of_creation = ctime(&now);
 }

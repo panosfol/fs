@@ -1,12 +1,11 @@
 #include "dir.hpp"
 
 Directory::Directory(std::string name, filetype type, Directory *parent_dir)
-    : FileObject(name, type) {
+    : FileObject(name, type, parent_dir) {
         time_t now = time(0);
         this->date_of_creation = ctime(&now);
         this->num_of_contents = 0;
         this->size_of_contents = 0;
-        this->parent_dir = parent_dir;
 };
 
 std::unique_ptr<FileObject> Directory::findOneContent(std::string name) {
@@ -24,7 +23,7 @@ Directory::getContents() {
         return this->contents;
 }
 
-void Directory::insertContent(std::unique_ptr<Directory> object) {
+void Directory::insertContent(std::unique_ptr<FileObject> object) {
         auto [it, ok] =
             this->contents.emplace(object->getName(), std::move(object));
         if (ok) {
@@ -44,29 +43,25 @@ int Directory::getNumContents() { return this->num_of_contents; }
 int Directory::getSizeOfContents() { return this->size_of_contents; }
 
 /*
- *  checkDirName
- *  Check if the given string is appropriate for a directory
+ *  checkObjName
+ *  Check if the given string is appropriate for an object
  *  in accordance to the Linux specification
  *
  * Returns:
  *  0 Success
- * -1 Failure - Name not allowed
- *
+ * -1 Error - Name too long
+ * -2 Error - Object already exists
  */
-int Directory::checkDirName(std::string name) {
+int Directory::checkObjName(std::string name) {
         // 255 is the maximum length of a name for a directory that Linux allows
         if (name.length() > 255) {
-                std::cerr << "mkdir: cannot create directory ‘" << name
-                          << "’: File name too long" << std::endl;
                 return -1;
         }
 
         // Check if the directory already exists
         for (auto &[key, value] : this->contents) {
                 if (name == key) {
-                        std::cerr << "mkdir: cannot create directory ‘" << name
-                                  << "’: File exists" << std::endl;
-                        return -1;
+                        return -2;
                 }
         }
         return 0;

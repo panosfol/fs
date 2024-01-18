@@ -1,8 +1,8 @@
 #include "file-object.hpp"
 #include "dir.hpp"
 
-FileObject::FileObject(std::string name, filetype type)
-    : name(name), type(type){};
+FileObject::FileObject(std::string name, filetype type, Directory* parent_dir)
+	: name(name), type(type), parent_dir(parent_dir){};
 
 std::string FileObject::getName() const { return this->name; };
 

@@ -94,9 +94,10 @@ void FS::executeCommand() {
                 this->listDirContents();
                 break;
         case commands::MKDIR:
-                this->createDirectory();
+                this->createObject(filetype::FSDIRECTORY);
                 break;
         case commands::TOUCH:
+                this->createObject(filetype::FSFILE);
                 break;
         case commands::RM:
                 break;
@@ -136,29 +137,48 @@ void FS::restoreState(Directory &s, const char *filename) {
         ia >> BOOST_NVP(s);
 }
 
-void FS::createDirectory() {
+void FS::createObject(filetype filetype) {
         // Always check if sufficient arguments are given to the command before
         // we proceed.
         if (this->command_arguments.empty()) {
-                std::cerr << "mkdir: missing operand" << std::endl;
+                std::cerr << this->fetchCommand() << ": missing operand"
+                          << std::endl;
                 return;
         }
 
-        std::string dir_name;
-        // Find the path that the directory will be created.
+        int ret;
+        std::string obj_name;
+        // Find the path that the object will be created.
         Directory *temp_dir =
-            this->findDirPath(this->command_arguments.front(), dir_name);
+            this->findDirPath(this->command_arguments.front(), obj_name);
         if (temp_dir == nullptr) {
                 return;
         }
-        if (temp_dir->checkDirName(dir_name) != 0) {
+
+        ret = temp_dir->checkObjName(obj_name);
+        if (ret == -1) {
+                std::cerr << this->fetchCommand() << ": cannot create object ‘"
+                          << obj_name << "’: File name too long" << std::endl;
                 return;
+        } else if (ret == -2) {
+                std::cerr << this->fetchCommand() << ": cannot create object ‘"
+                          << obj_name << "’: File exists" << std::endl;
+		return;
         }
 
-        std::unique_ptr<Directory> dir = std::make_unique<Directory>(
-            dir_name, filetype::FSDIRECTORY, temp_dir);
-        dir->setAbsolutePath(dir->getParentDir()->getAbsolutePath(), dir_name);
-        temp_dir->insertContent(std::move(dir));
+        if (filetype == filetype::FSDIRECTORY) {
+                std::unique_ptr<Directory> dir =
+                    std::make_unique<Directory>(obj_name, filetype, temp_dir);
+                dir->setAbsolutePath(dir->getParentDir()->getAbsolutePath(),
+                                     obj_name);
+                temp_dir->insertContent(std::move(dir));
+        } else {
+                std::unique_ptr<File> file =
+                    std::make_unique<File>(obj_name, filetype, temp_dir);
+                file->setAbsolutePath(file->getParentDir()->getAbsolutePath(),
+                                      obj_name);
+                temp_dir->insertContent(std::move(file));
+        }
 }
 
 Directory *FS::findDirPath(std::string path_to_dir, std::string &name) {
@@ -206,15 +226,17 @@ Directory *FS::findDirPath(std::string path_to_dir, std::string &name) {
                 } else {
                         found = false;
                         for (auto &[key, value] : temp_dir->getContents()) {
-                                if (key == *it) {
+                                if (key == *it &&
+                                    value->getType() == filetype::FSDIRECTORY) {
                                         temp_dir = (Directory *)value.get();
                                         found = true;
                                         break;
                                 }
                         }
                         if (!found) {
-                                std::cerr << this->fetchCommand() << path_to_dir
-                                          << " No such file or directory"
+                                std::cerr << this->fetchCommand() << " "
+                                          << path_to_dir
+                                          << ": No such file or directory"
                                           << std::endl;
                                 return nullptr;
                         }
@@ -258,7 +280,8 @@ Directory *FS::findDirPath(std::string path_to_dir) {
                                            std::unique_ptr<FileObject>>
                             &contents = temp_dir->getContents();
                         for (auto &[key, value] : contents) {
-                                if (key == *it) {
+                                if (key == *it &&
+                                    value->getType() == filetype::FSDIRECTORY) {
                                         temp_dir = (Directory *)value.get();
                                         found = true;
                                         break;
@@ -267,8 +290,7 @@ Directory *FS::findDirPath(std::string path_to_dir) {
                         if (!found) {
                                 std::cerr << this->fetchCommand() << " "
                                           << path_to_dir
-                                          << ": No such file or directory"
-                                          << std::endl;
+                                          << ": No such directory" << std::endl;
                                 return nullptr;
                                 break;
                         }

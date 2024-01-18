@@ -35,7 +35,7 @@ protected:
 
 public:
         FileObject() = default; // for deserialization
-        FileObject(std::string, filetype);
+        FileObject(std::string, filetype, Directory *);
 
         virtual ~FileObject() = default;
 

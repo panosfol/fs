@@ -44,12 +44,12 @@ public:
         void saveState(const Directory &s, const char *);
         void restoreState(Directory &s, const char *);
 
-        void createDirectory();
+        void createObject(filetype);
 
         /*
-         * This is used for creating a new Directory. After parsing the path, we
-         * save the name in the given variable so we can create the Directory
-         * after.
+         * This is used for creating a new Object(Directory or File). After
+         * parsing the path, we save the name in the given variable so we can
+         * create the Object after.
          */
         Directory *findDirPath(std::string path_to_dir, std::string &name);
 

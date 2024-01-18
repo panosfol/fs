@@ -43,13 +43,12 @@ public:
         std::unique_ptr<FileObject> findOneContent(std::string name);
         std::unordered_map<std::string, std::unique_ptr<FileObject>> &
         getContents();
-        void insertContent(std::unique_ptr<Directory> object);
         void insertContent(std::unique_ptr<FileObject> object);
 
         void listContents();
         int getNumContents();
         int getSizeOfContents();
 
-        int checkDirName(std::string);
+        int checkObjName(std::string);
 };
 #endif

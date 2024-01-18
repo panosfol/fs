@@ -33,7 +33,7 @@ protected:
 
 public:
         File(){};
-        File(std::string, filetype file_type);
+        File(std::string, filetype file_type, Directory *parent_dir);
 
         void setSize(int);
         int getSize();
