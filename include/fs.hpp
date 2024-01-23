@@ -46,6 +46,7 @@ public:
 
         void createObject(filetype);
 	void deleteObject();
+	void printContents();
 
         /*
          * This is used for creating a new Object(Directory or File). After

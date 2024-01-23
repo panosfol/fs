@@ -107,6 +107,7 @@ void FS::executeCommand() {
         case commands::CP:
                 break;
         case commands::CAT:
+                this->printContents();
                 break;
         case commands::FIND:
                 break;
@@ -374,13 +375,41 @@ void FS::listDirContents() {
                 std::string path_to_dir = command_arguments.front();
                 Directory *dir = findDirPath(path_to_dir);
                 if (dir == nullptr) {
-                        std::cerr << this->fetchCommand() << ": cannot access '"
-                                  << path_to_dir
-                                  << "': No such file or directory"
-                                  << std::endl;
+                        return;
                 } else {
                         dir->listContents();
                 }
                 return;
+        }
+}
+
+void FS::printContents() {
+        // Always check if sufficient arguments are given to the command before
+        // we proceed.
+        if (this->command_arguments.empty()) {
+                std::cerr << this->fetchCommand() << ": missing operand"
+                          << std::endl;
+                return;
+        }
+
+        int ret;
+        std::string file_name;
+        // Find the path of the file
+        Directory *temp_dir =
+            this->findDirPath(this->command_arguments.front(), file_name);
+        if (temp_dir == nullptr) {
+                return;
+        }
+        for (auto &[key, value] : temp_dir->getContents()) {
+                if (key == file_name) {
+                        if (value->getType() == filetype::FSFILE) {
+                                ((File *)value.get())->printContent();
+                        } else {
+                                std::cerr << this->fetchCommand() << ": "
+                                          << this->command_arguments.front()
+                                          << ": Is a directory" << std::endl;
+                        }
+                        break;
+                }
         }
 }

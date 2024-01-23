@@ -35,9 +35,10 @@ public:
         File(){};
         File(std::string, filetype file_type, Directory *parent_dir);
 
-        void setSize(int);
-        int getSize();
-
-        // TODO methods for creating and reading content
+	void writeToFile();
+	void setContent(std::string);
+	std::string getContent();
+	void printContent();
+	void clearContents();
 };
 #endif
