@@ -31,6 +31,13 @@ void Directory::insertContent(std::unique_ptr<FileObject> object) {
         }
 }
 
+void Directory::removeContent(std::string name) {
+        if (!this->contents.erase(name)) {
+                std::cerr << "rm: cannot remove '" << name
+                          << "': No such file or directory" << std::endl;
+        }
+}
+
 void Directory::listContents() {
         for (auto it = this->contents.begin(); it != this->contents.end();
              it++) {

@@ -44,6 +44,7 @@ public:
         std::unordered_map<std::string, std::unique_ptr<FileObject>> &
         getContents();
         void insertContent(std::unique_ptr<FileObject> object);
+        void removeContent(std::string);
 
         void listContents();
         int getNumContents();

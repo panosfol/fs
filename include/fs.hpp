@@ -45,6 +45,7 @@ public:
         void restoreState(Directory &s, const char *);
 
         void createObject(filetype);
+	void deleteObject();
 
         /*
          * This is used for creating a new Object(Directory or File). After

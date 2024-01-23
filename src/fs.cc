@@ -100,6 +100,7 @@ void FS::executeCommand() {
                 this->createObject(filetype::FSFILE);
                 break;
         case commands::RM:
+                this->deleteObject();
                 break;
         case commands::MV:
                 break;
@@ -181,6 +182,26 @@ void FS::createObject(filetype filetype) {
         }
 }
 
+void FS::deleteObject() {
+        // Always check if sufficient arguments are given to the command before
+        // we proceed.
+        if (this->command_arguments.empty()) {
+                std::cerr << this->fetchCommand() << ": missing operand"
+                          << std::endl;
+                return;
+        }
+
+        int ret;
+        std::string obj_name;
+        // Find the path that the object will be deleted.
+        Directory *temp_dir =
+            this->findDirPath(this->command_arguments.front(), obj_name);
+        if (temp_dir == nullptr) {
+                return;
+        }
+        temp_dir->removeContent(obj_name);
+}
+
 Directory *FS::findDirPath(std::string path_to_dir, std::string &name) {
         bool found;
         Directory *temp_dir;
@@ -234,7 +255,7 @@ Directory *FS::findDirPath(std::string path_to_dir, std::string &name) {
                                 }
                         }
                         if (!found) {
-                                std::cerr << this->fetchCommand() << " "
+                                std::cerr << this->fetchCommand() << ": "
                                           << path_to_dir
                                           << ": No such file or directory"
                                           << std::endl;
@@ -276,10 +297,7 @@ Directory *FS::findDirPath(std::string path_to_dir) {
                         continue;
                 } else {
                         found = false;
-                        std::unordered_map<std::string,
-                                           std::unique_ptr<FileObject>>
-                            &contents = temp_dir->getContents();
-                        for (auto &[key, value] : contents) {
+                        for (auto &[key, value] : temp_dir->getContents()) {
                                 if (key == *it &&
                                     value->getType() == filetype::FSDIRECTORY) {
                                         temp_dir = (Directory *)value.get();
@@ -288,7 +306,7 @@ Directory *FS::findDirPath(std::string path_to_dir) {
                                 }
                         }
                         if (!found) {
-                                std::cerr << this->fetchCommand() << " "
+                                std::cerr << this->fetchCommand() << ": "
                                           << path_to_dir
                                           << ": No such directory" << std::endl;
                                 return nullptr;
