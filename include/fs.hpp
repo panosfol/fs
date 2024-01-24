@@ -45,20 +45,23 @@ public:
         void restoreState(Directory &s, const char *);
 
         void createObject(filetype);
-	void deleteObject();
-	void printContents();
+        void deleteObject();
+        void printContents();
+
+        void moveObject();
 
         /*
-         * This is used for creating a new Object(Directory or File). After
-         * parsing the path, we save the name in the given variable so we can
-         * create the Object after.
+         * This is used to parse the path and seperate the name of the object
+         * from its parent directory. The name is used either to locate one
+         * specific object or create a new one.
          */
         Directory *findDirPath(std::string path_to_dir, std::string &name);
 
         /*
          * This is used for generally finding the path, and this is what will be
          * called in the majority of commands. Only the path is needed, which
-         * will be parsed and the directory found will be returned.
+         * will be parsed and the parent directory of the object that was found
+         * will be returned.
          */
         Directory *findDirPath(std::string path_to_dir);
         void changeDir();

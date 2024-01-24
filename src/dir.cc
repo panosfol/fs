@@ -9,14 +9,12 @@ Directory::Directory(std::string name, filetype type, Directory *parent_dir)
         this->size_of_contents = 0;
 };
 
-std::unique_ptr<FileObject> Directory::findOneContent(std::string name) {
-        std::unordered_map<std::string, std::unique_ptr<FileObject>>::iterator
-            it = this->contents.find(name);
+FileObject *Directory::findOneContent(std::string name) {
+        auto it = this->contents.find(name);
         if (it == contents.end()) {
-                std::cout << "file not found" << std::endl;
-                return NULL;
+                return nullptr;
         } else
-                return std::move(it->second);
+                return it->second.get();
 };
 
 std::unordered_map<std::string, std::unique_ptr<FileObject>> &
@@ -36,6 +34,8 @@ void Directory::removeContent(std::string name) {
         if (!this->contents.erase(name)) {
                 std::cerr << "rm: cannot remove '" << name
                           << "': No such file or directory" << std::endl;
+        } else {
+                this->num_of_contents--;
         }
 }
 
@@ -80,3 +80,165 @@ int Directory::checkObjName(std::string name) {
         }
         return 0;
 };
+
+void Directory::moveContent(Directory *dest_dir, std::string obj_name) {
+        Directory *temp_dir = dest_dir;
+
+        /*
+         * First find the object that is about to be moved. If not, produce an
+         * error. Then we iterate through the path of the DEST directory and
+         * compare the absolute path of our object to each directory in our
+         * path. If the absolute paths are equal that means that an attempt to
+         * move a directory inside itself was made, therefore we produce an
+         * error and return.
+         */
+        auto it = this->contents.find(obj_name);
+        if (it == this->contents.end()) {
+                std::cerr << "mv: cannot stat '" << obj_name
+                          << "': No such file or directory" << std::endl;
+                return;
+        }
+        while (temp_dir != nullptr) {
+                if (it->second->getAbsolutePath() ==
+                    temp_dir->getAbsolutePath()) {
+                        std::cerr << "mv: cannot move '" << obj_name
+                                  << "' to a subdirectory of itself"
+                                  << std::endl;
+                        return;
+                }
+                temp_dir = temp_dir->getParentDir();
+        }
+
+        if (it->second->getType() == filetype::FSDIRECTORY) {
+                this->moveDirectory(dest_dir, obj_name);
+        } else {
+                this->moveFile(dest_dir, obj_name);
+        }
+}
+
+void Directory::moveDirectory(Directory *dest_dir, std::string dir_name) {
+        std::unordered_map<std::string, std::unique_ptr<FileObject>> &contents =
+            dest_dir->getContents();
+
+        // We have already checked if the source dir has the directory. Now
+        // check for dest_dir.
+        auto source_dir_it = this->contents.find(dir_name);
+        auto dest_dir_it = contents.find(dir_name);
+
+        /*
+         * There are 4 possible cases that are covered here:
+         * 1. We move our source directory into a target directory, and we have
+         * 0 conflicts.
+         * 2. We move the source directory into a target directory, and our
+         * target has a file with the same name, therefore we produce an error.
+         * 3. We move our source directory into a target directory, and out
+         * target has a directory with the same name. There are 2 possible cases
+         * here: 3a. The directory inside the target is empty, therefore we
+         * replace it. 3b. The directory inside the target is not empty,
+         * therefore we produce an error.
+         */
+        if (dest_dir_it == contents.end()) {
+                source_dir_it->second->setParentDir(dest_dir);
+                source_dir_it->second->setAbsolutePath(
+                    dest_dir->getAbsolutePath(), dir_name);
+
+                /*
+                 * Recursively change all the absolute paths and parent
+                 * directories of the contents of the directory about to
+                 * be moved.
+                 */
+                ((Directory *)source_dir_it->second.get())
+                    ->changeAbsPathOfContentDirs();
+                dest_dir->insertContent(std::move(source_dir_it->second));
+                this->removeContent(dir_name);
+        } else if (dest_dir_it->second->getType() == filetype::FSFILE) {
+                std::cerr << "mv: cannot overwrite non-directory '"
+                          << dest_dir_it->second->getParentDir()->getName()
+                          << "/" << dest_dir_it->second->getName()
+                          << "' with directory '" << dir_name << "'"
+                          << std::endl;
+                return;
+        } else if (dest_dir_it->second->getType() == filetype::FSDIRECTORY) {
+                /*
+                 * We need to use the 'get()' method to cast to `Directory *`,
+                 * so we can use `getContents()`.
+                 */
+                if (((Directory *)dest_dir_it->second.get())
+                        ->getContents()
+                        .empty()) {
+                        dest_dir->removeContent(dir_name);
+                        source_dir_it->second->setParentDir(dest_dir);
+                        source_dir_it->second->setAbsolutePath(
+                            dest_dir->getAbsolutePath(), dir_name);
+
+                        /*
+                         * Recursively change all the absolute paths and parent
+                         * directories of the contents of the directory about to
+                         * be moved.
+                         */
+                        ((Directory *)source_dir_it->second.get())
+                            ->changeAbsPathOfContentDirs();
+                        dest_dir->insertContent(
+                            std::move(source_dir_it->second));
+                        this->removeContent(dir_name);
+                } else {
+                        std::cerr
+                            << "mv: cannot move '" << dir_name << "' to '"
+                            << dest_dir_it->second->getParentDir()->getName()
+                            << "/" << dest_dir_it->second->getName()
+                            << "': Directory not empty" << std::endl;
+                        return;
+                }
+        }
+}
+
+void Directory::moveFile(Directory *dest_dir, std::string file_name) {
+        std::unordered_map<std::string, std::unique_ptr<FileObject>> &contents =
+            dest_dir->getContents();
+
+        // We have already checked if the source dir has the file. Now check for
+        // dest_dir.
+        auto source_file_it = this->contents.find(file_name);
+        auto dest_dir_it = contents.find(file_name);
+
+        /*
+         * If the file does not exist in our target directory, then we just move
+         * it there. If a file with the same name does exist, it gets replaced.
+         * If a directory with the same name exist we produce an error.
+         */
+        if (dest_dir_it == contents.end()) {
+                source_file_it->second->setParentDir(dest_dir);
+                source_file_it->second->setAbsolutePath(
+                    dest_dir->getAbsolutePath(), file_name);
+                dest_dir->insertContent(std::move(source_file_it->second));
+                this->removeContent(file_name);
+        } else if (dest_dir_it->second->getType() == filetype::FSDIRECTORY) {
+                std::cerr << "mv: cannot overwrite directory '"
+                          << dest_dir_it->second->getParentDir()->getName()
+                          << "/" << dest_dir_it->second->getName()
+                          << "' with non-directory" << std::endl;
+                return;
+        } else if (dest_dir_it->second->getType() == filetype::FSFILE) {
+                dest_dir->removeContent(file_name);
+                source_file_it->second->setParentDir(dest_dir);
+                source_file_it->second->setAbsolutePath(
+                    dest_dir->getAbsolutePath(), file_name);
+                dest_dir->insertContent(std::move(source_file_it->second));
+                this->removeContent(file_name);
+        }
+}
+
+/*
+ * This method changes the absolute path and the parent directories
+ * on all directories  in `this->content` recursively.
+ */
+void Directory::changeAbsPathOfContentDirs() {
+        for (auto &[key, value] : this->contents) {
+                value->setAbsolutePath(value->getParentDir()->getAbsolutePath(),
+                                       value->getName());
+                if (value->getType() == filetype::FSDIRECTORY) {
+                        ((Directory *)value.get())
+                            ->changeAbsPathOfContentDirs();
+                }
+        }
+}

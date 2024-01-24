@@ -20,8 +20,6 @@
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/unordered_map.hpp>
 
-#define ROOT "FileSystem Root Directory"
-
 class Directory : public FileObject {
 private:
         friend class boost::serialization::access;
@@ -38,18 +36,27 @@ private:
 
 public:
         Directory() = default; // for deserialization
-        Directory(std::string, filetype type, Directory *parent_dir);
+        Directory(std::string, filetype, Directory *);
 
-        std::unique_ptr<FileObject> findOneContent(std::string name);
+        FileObject *findOneContent(std::string);
         std::unordered_map<std::string, std::unique_ptr<FileObject>> &
         getContents();
-        void insertContent(std::unique_ptr<FileObject> object);
+        void insertContent(std::unique_ptr<FileObject>);
         void removeContent(std::string);
+
+        void moveContent(Directory *, std::string);
+        void moveDirectory(Directory *, std::string);
+        void moveFile(Directory *, std::string);
 
         void listContents();
         int getNumContents();
         int getSizeOfContents();
 
         int checkObjName(std::string);
+        /*
+         * This method changes all the absolute paths of the directories
+         * inside a directory. It works recursively.
+         */
+        void changeAbsPathOfContentDirs();
 };
 #endif

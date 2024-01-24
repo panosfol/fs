@@ -26,7 +26,8 @@ FS::FS() {
 void FS::mainLoop() {
         while (this->command != commands::EXIT) {
                 std::cout << "\u001b[1m\033[32mfile-system\033[0m:"
-                          << "\u001b[1m\033[34m" << this->current_path << "\033[0m$ ";
+                          << "\u001b[1m\033[34m" << this->current_path
+                          << "\033[0m$ ";
                 this->command = commands::DEFAULT;
                 if (this->parseCommand()) {
                         this->executeCommand();
@@ -104,6 +105,7 @@ void FS::executeCommand() {
                 this->deleteObject();
                 break;
         case commands::MV:
+                this->moveObject();
                 break;
         case commands::CP:
                 break;
@@ -166,7 +168,7 @@ void FS::createObject(filetype filetype) {
         } else if (ret == -2) {
                 std::cerr << this->fetchCommand() << ": cannot create object ‘"
                           << obj_name << "’: File exists" << std::endl;
-		return;
+                return;
         }
 
         if (filetype == filetype::FSDIRECTORY) {
@@ -312,7 +314,6 @@ Directory *FS::findDirPath(std::string path_to_dir) {
                                           << path_to_dir
                                           << ": No such directory" << std::endl;
                                 return nullptr;
-                                break;
                         }
                 }
         }
@@ -330,7 +331,7 @@ void FS::changeDir() {
 
         std::string path = this->command_arguments.front();
         Directory *target_dir = findDirPath(path);
-        if (target_dir == NULL) {
+        if (target_dir == nullptr) {
                 return;
         }
         this->current_path = target_dir->getAbsolutePath();
@@ -413,4 +414,50 @@ void FS::printContents() {
                         break;
                 }
         }
+}
+
+void FS::moveObject() {
+        // Always check if sufficient arguments are given to the command before
+        // we proceed.
+        if (this->command_arguments.empty()) {
+                std::cerr << this->fetchCommand() << ": missing file operand"
+                          << std::endl;
+                return;
+        } else if (this->command_arguments.size() == 1) {
+                std::cerr << this->fetchCommand()
+                          << ": missing destination operand after '"
+                          << this->command_arguments.front() << "'"
+                          << std::endl;
+                return;
+        }
+
+        std::string src_object_name;
+        // Find the parent directory of where our object is located, and the
+        // objects name.
+        Directory *source_dir =
+            this->findDirPath(this->command_arguments.front(), src_object_name);
+        if (source_dir == nullptr) {
+                return;
+        }
+        Directory *dest_dir = this->findDirPath(this->command_arguments.back());
+        if (dest_dir == nullptr) {
+                return;
+        }
+        /* If the directories are the same, we attempt to move something in
+         * place, therefore an error is produced.
+         */
+        if (source_dir == dest_dir) {
+                // This is to ensure that the path appear correctly for the
+                // user.
+                if (this->command_arguments.back().back() == '/') {
+                        this->command_arguments.back().pop_back();
+                }
+                std::cerr << "mv: '" << this->command_arguments.front()
+                          << "' and '" << this->command_arguments.back() << "/"
+                          << src_object_name << "' are the same file"
+                          << std::endl;
+                return;
+        }
+
+        source_dir->moveContent(dest_dir, src_object_name);
 }

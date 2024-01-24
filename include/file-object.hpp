@@ -9,7 +9,7 @@
 #include <boost/serialization/library_version_type.hpp>
 #endif
 
-#define ROOT "FileSystem Root Directory"
+#define ROOT "."
 
 // Forward declaration of Directory class to be used in the FileObject class
 class Directory;
