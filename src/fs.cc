@@ -25,7 +25,8 @@ FS::FS() {
 
 void FS::mainLoop() {
         while (this->command != commands::EXIT) {
-                std::cout << "file-system:" << this->current_path << "$ ";
+                std::cout << "\u001b[1m\033[32mfile-system\033[0m:"
+                          << "\u001b[1m\033[34m" << this->current_path << "\033[0m$ ";
                 this->command = commands::DEFAULT;
                 if (this->parseCommand()) {
                         this->executeCommand();

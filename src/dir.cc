@@ -1,4 +1,5 @@
 #include "dir.hpp"
+#include "file-object.hpp"
 
 Directory::Directory(std::string name, filetype type, Directory *parent_dir)
     : FileObject(name, type, parent_dir) {
@@ -41,7 +42,13 @@ void Directory::removeContent(std::string name) {
 void Directory::listContents() {
         for (auto it = this->contents.begin(); it != this->contents.end();
              it++) {
-                std::cout << it->second->getName() << std::endl;
+                if (it->second->getType() == filetype::FSDIRECTORY) {
+                        std::cout << "\u001b[1m\033[34m"
+                                  << it->second->getName() << "\033[0m"
+                                  << std::endl;
+                } else {
+                        std::cout << it->second->getName() << std::endl;
+                }
         }
 }
 
