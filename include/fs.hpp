@@ -49,6 +49,7 @@ public:
         void printContents();
 
         void moveObject();
+        void copyObject();
 
         /*
          * This is used to parse the path and seperate the name of the object

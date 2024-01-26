@@ -9,7 +9,7 @@
 FS::FS() {
         // The root directory doesn't have a parent directory, therefore we use
         // nullptr.
-        this->root_dir = Directory(ROOT, filetype::FSDIRECTORY, nullptr);
+        this->root_dir = Directory(ROOT, filetype::FSDIRECTORY);
         this->root_dir.setAbsolutePath("/");
 
         this->current_path = this->root_dir.getAbsolutePath();
@@ -108,6 +108,7 @@ void FS::executeCommand() {
                 this->moveObject();
                 break;
         case commands::CP:
+                this->copyObject();
                 break;
         case commands::CAT:
                 this->printContents();
@@ -174,14 +175,10 @@ void FS::createObject(filetype filetype) {
         if (filetype == filetype::FSDIRECTORY) {
                 std::unique_ptr<Directory> dir =
                     std::make_unique<Directory>(obj_name, filetype, temp_dir);
-                dir->setAbsolutePath(dir->getParentDir()->getAbsolutePath(),
-                                     obj_name);
                 temp_dir->insertContent(std::move(dir));
         } else {
                 std::unique_ptr<File> file =
                     std::make_unique<File>(obj_name, filetype, temp_dir);
-                file->setAbsolutePath(file->getParentDir()->getAbsolutePath(),
-                                      obj_name);
                 temp_dir->insertContent(std::move(file));
         }
 }
@@ -460,4 +457,51 @@ void FS::moveObject() {
         }
 
         source_dir->moveContent(dest_dir, src_object_name);
+}
+
+void FS::copyObject() {
+        // Always check if sufficient arguments are given to the command before
+        // we proceed.
+        if (this->command_arguments.empty()) {
+                std::cerr << this->fetchCommand() << ": missing file operand"
+                          << std::endl;
+                return;
+        } else if (this->command_arguments.size() == 1) {
+                std::cerr << this->fetchCommand()
+                          << ": missing destination operand after '"
+                          << this->command_arguments.front() << "'"
+                          << std::endl;
+                return;
+        }
+
+        std::string src_object_name;
+        // Find the parent directory of where our object is located, and the
+        // objects name.
+        Directory *source_dir =
+            this->findDirPath(this->command_arguments.front(), src_object_name);
+        if (source_dir == nullptr) {
+                return;
+        }
+        Directory *dest_dir = this->findDirPath(this->command_arguments.back());
+        if (dest_dir == nullptr) {
+                return;
+        }
+
+        /* If the directories are the same, we attempt to move something in
+         * place, therefore an error is produced.
+         */
+        if (source_dir == dest_dir) {
+                // This is to ensure that the path appear correctly for the
+                // user.
+                if (this->command_arguments.back().back() == '/') {
+                        this->command_arguments.back().pop_back();
+                }
+                std::cerr << "cp: '" << this->command_arguments.front()
+                          << "' and '" << this->command_arguments.back() << "/"
+                          << src_object_name << "' are the same file"
+                          << std::endl;
+                return;
+        }
+
+        source_dir->copyContent(dest_dir, src_object_name);
 }

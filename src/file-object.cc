@@ -1,8 +1,16 @@
 #include "file-object.hpp"
 #include "dir.hpp"
 
-FileObject::FileObject(std::string name, filetype type, Directory* parent_dir)
-	: name(name), type(type), parent_dir(parent_dir){};
+FileObject::FileObject(std::string name, filetype type)
+    : name(name), type(type) {
+        this->parent_dir = nullptr;
+};
+
+FileObject::FileObject(std::string name, filetype type, Directory *parent_dir)
+    : name(name), type(type), parent_dir(parent_dir) {
+        this->setAbsolutePath(this->getParentDir()->getAbsolutePath(),
+                              this->getName());
+};
 
 std::string FileObject::getName() const { return this->name; };
 

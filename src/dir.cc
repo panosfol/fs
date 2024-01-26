@@ -1,6 +1,13 @@
 #include "dir.hpp"
 #include "file-object.hpp"
 
+Directory::Directory(std::string name, filetype type) : FileObject(name, type) {
+        time_t now = time(0);
+        this->date_of_creation = ctime(&now);
+        this->num_of_contents = 0;
+        this->size_of_contents = 0;
+};
+
 Directory::Directory(std::string name, filetype type, Directory *parent_dir)
     : FileObject(name, type, parent_dir) {
         time_t now = time(0);
@@ -240,5 +247,38 @@ void Directory::changeAbsPathOfContentDirs() {
                         ((Directory *)value.get())
                             ->changeAbsPathOfContentDirs();
                 }
+        }
+}
+
+void Directory::copyContent(Directory *dest_dir, std::string obj_name) {
+        /* Find the object inside our source directory, and if found check if
+         * it is of type FSFILE. If not produce an error.
+         */
+        auto it_source = this->contents.find(obj_name);
+        if (it_source == this->contents.end()) {
+                std::cerr << "cp: cannot stat '" << obj_name
+                          << "': No such file" << std::endl;
+                return;
+        } else if (it_source->second->getType() == filetype::FSDIRECTORY) {
+                std::cerr << "cp: cannot copy directory" << std::endl;
+                return;
+        }
+
+        auto it_dest = dest_dir->getContents().find(obj_name);
+        if (it_dest == dest_dir->getContents().end()) {
+                std::unique_ptr<File> file = std::make_unique<File>(
+                    obj_name, filetype::FSFILE, dest_dir);
+                file->setContent(
+                    ((File *)it_source->second.get())->getContent());
+                dest_dir->insertContent(std::move(file));
+        } else if (it_dest->second->getType() == filetype::FSDIRECTORY) {
+                std::cerr << "cp: cannot overwrite directory '"
+                          << it_dest->second->getParentDir()->getName() << "/"
+                          << it_dest->second->getName()
+                          << "' with non-directory" << std::endl;
+        } else {
+                ((File *)it_dest->second.get())
+                    ->setContent(
+                        ((File *)it_source->second.get())->getContent());
         }
 }

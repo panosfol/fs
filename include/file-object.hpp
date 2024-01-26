@@ -34,7 +34,8 @@ protected:
         std::string absolute_path;
 
 public:
-        FileObject() = default; // for deserialization
+        FileObject() = default;            // for deserialization
+        FileObject(std::string, filetype); // for the root directory only
         FileObject(std::string, filetype, Directory *);
 
         virtual ~FileObject() = default;

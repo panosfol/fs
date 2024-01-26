@@ -35,7 +35,8 @@ private:
         int size_of_contents;
 
 public:
-        Directory() = default; // for deserialization
+        Directory() = default;            // for deserialization
+        Directory(std::string, filetype); // used for creating he root dir only
         Directory(std::string, filetype, Directory *);
 
         FileObject *findOneContent(std::string);
@@ -47,6 +48,8 @@ public:
         void moveContent(Directory *, std::string);
         void moveDirectory(Directory *, std::string);
         void moveFile(Directory *, std::string);
+
+        void copyContent(Directory *, std::string);
 
         void listContents();
         int getNumContents();
