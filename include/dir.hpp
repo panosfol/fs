@@ -26,28 +26,35 @@ private:
 
         template <class Ar> void serialize(Ar &ar, unsigned) {
                 ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FileObject) &
-                    BOOST_NVP(num_of_contents) & BOOST_NVP(size_of_contents) &
                     BOOST_NVP(contents);
         }
 
-protected:
         std::unordered_map<std::string, std::unique_ptr<FileObject>> contents;
-        int num_of_contents;
-        int size_of_contents;
 
 public:
-        Directory() = default; // for deserialization
-        Directory(std::string, filetype type);
+        Directory() = default;            // for deserialization
+        Directory(std::string, filetype); // used for creating he root dir only
+        Directory(std::string, filetype, Directory *);
 
-        std::unique_ptr<FileObject> findOneContent(std::string name);
+        FileObject *findOneContent(std::string);
         std::unordered_map<std::string, std::unique_ptr<FileObject>> &
         getContents();
-        void insertContent(std::unique_ptr<Directory> object);
-        void insertContent(std::unique_ptr<FileObject> object);
+        void insertContent(std::unique_ptr<FileObject>);
+        void removeContent(std::string);
+
+        void moveContent(Directory *, std::string);
+        void moveDirectory(Directory *, std::string);
+        void moveFile(Directory *, std::string);
+
+        void copyContent(Directory *, std::string);
 
         void listContents();
 
-        int getNumContents();
-        int getSizeOfContents();
+        int checkObjName(std::string);
+        /*
+         * This method changes all the absolute paths of the directories
+         * inside a directory. It works recursively.
+         */
+        void changeAbsPathOfContentDirs();
 };
 #endif

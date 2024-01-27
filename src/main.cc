@@ -12,10 +12,8 @@ BOOST_CLASS_EXPORT(File)
 BOOST_CLASS_EXPORT(Directory)
 
 int main() {
-        FS *fs = new FS();
-        fs->main_loop();
-
-        delete (fs);
+        std::unique_ptr<FS> fs = std::make_unique<FS>();
+        fs->mainLoop();
 
         return 0;
 }

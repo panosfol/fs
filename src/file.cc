@@ -1,12 +1,30 @@
 #include "file.hpp"
 
-File::File(std::string name, filetype type) : FileObject(name, type) {
-        time_t now = time(0);
-        this->date_of_creation = ctime(&now);
+File::File(std::string name, filetype type, Directory *parent_dir)
+    : FileObject(name, type, parent_dir) {
+        this->writeToFile();
 }
 
-void File::setSize(int size) { this->size = size; }
+void File::writeToFile() {
+        std::string newContent;
+        std::cout << "Enter new content for file (type 'exit' to finish):"
+                  << std::endl;
 
-int File::getSize() { return this->size; }
+        std::string line;
+        while (std::getline(std::cin, line)) {
+                if (line == "exit") {
+                        break;
+                }
+                newContent += line + '\n';
+        }
 
-// TODO methods for content should be added when content-handling is figured out
+        this->setContent(newContent);
+}
+
+void File::printContent() { std::cout << this->content; }
+
+std::string File::getContent() { return this->content; }
+
+void File::setContent(std::string content) { this->content = content; }
+
+void File::clearContents() { this->content.clear(); }
