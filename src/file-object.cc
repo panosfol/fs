@@ -48,6 +48,4 @@ void FileObject::setParentDir(Directory *parent_dir) {
 
 Directory *FileObject::getParentDir() { return this->parent_dir; }
 
-std::string FileObject::getDate() { return this->date_of_creation; };
-
 filetype FileObject::getType() { return this->type; };

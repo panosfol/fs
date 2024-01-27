@@ -7,8 +7,10 @@
 #include "fs.hpp"
 
 FS::FS() {
-        // The root directory doesn't have a parent directory, therefore we use
-        // nullptr.
+        /*
+         * The root directory doesn't have a parent directory,
+         * therefore we use nullptr.
+         */
         this->root_dir = Directory(ROOT, filetype::FSDIRECTORY);
         this->root_dir.setAbsolutePath("/");
 
@@ -16,8 +18,10 @@ FS::FS() {
         this->current_dir = &this->root_dir;
         this->command = commands::DEFAULT;
 
-        // Check to see if a previous filesystem save file exists, and if so
-        // load it.
+        /*
+         * Check to see if a previous filesystem save file exists,
+         * and if so load it.
+         */
         if (std::filesystem::exists(SAVEFILE)) {
                 this->restoreState(this->root_dir, SAVEFILE);
         }
@@ -43,8 +47,10 @@ bool FS::parseCommand() {
         std::getline(std::cin, unparsed_command);
         std::stringstream ss(unparsed_command);
 
-        // Get the first word of the unparsed string and check if it's a valid
-        // command. If it's not we dont need to continue with parsing.
+        /*
+         * Get the first word of the unparsed string and check if it's a valid
+         * command. If it's not we dont need to continue with parsing.
+         */
         ss >> word;
 
         if (word == "cd") {
@@ -63,12 +69,6 @@ bool FS::parseCommand() {
                 this->command = commands::CP;
         } else if (word == "cat") {
                 this->command = commands::CAT;
-        } else if (word == "find") {
-                this->command = commands::FIND;
-        } else if (word == "info") {
-                this->command = commands::INFO;
-        } else if (word == "help") {
-                this->command = commands::HELP;
         } else if (word == "exit") {
                 this->command = commands::EXIT;
         } else {
@@ -113,13 +113,7 @@ void FS::executeCommand() {
         case commands::CAT:
                 this->printContents();
                 break;
-        case commands::FIND:
-                break;
-        case commands::INFO:
-                break;
         case commands::EXIT:
-                break;
-        case commands::HELP:
                 break;
         case commands::DEFAULT:
                 break;
@@ -144,8 +138,10 @@ void FS::restoreState(Directory &s, const char *filename) {
 }
 
 void FS::createObject(filetype filetype) {
-        // Always check if sufficient arguments are given to the command before
-        // we proceed.
+        /*
+         * Always check if sufficient arguments are given to the command before
+         * we proceed.
+         */
         if (this->command_arguments.empty()) {
                 std::cerr << this->fetchCommand() << ": missing operand"
                           << std::endl;
@@ -184,8 +180,10 @@ void FS::createObject(filetype filetype) {
 }
 
 void FS::deleteObject() {
-        // Always check if sufficient arguments are given to the command before
-        // we proceed.
+        /*
+         * Always check if sufficient arguments are given to the command before
+         * we proceed.
+         */
         if (this->command_arguments.empty()) {
                 std::cerr << this->fetchCommand() << ": missing operand"
                           << std::endl;
@@ -353,14 +351,8 @@ std::string FS::fetchCommand() {
                 return "cp";
         case commands::CAT:
                 return "cat";
-        case commands::FIND:
-                return "find";
-        case commands::INFO:
-                return "info";
         case commands::EXIT:
                 return "exit";
-        case commands::HELP:
-                return "help";
         default:
                 return "default";
         }
@@ -383,8 +375,10 @@ void FS::listDirContents() {
 }
 
 void FS::printContents() {
-        // Always check if sufficient arguments are given to the command before
-        // we proceed.
+        /*
+         * Always check if sufficient arguments are given to the command before
+         * we proceed.
+         */
         if (this->command_arguments.empty()) {
                 std::cerr << this->fetchCommand() << ": missing operand"
                           << std::endl;
@@ -414,8 +408,10 @@ void FS::printContents() {
 }
 
 void FS::moveObject() {
-        // Always check if sufficient arguments are given to the command before
-        // we proceed.
+        /*
+         * Always check if sufficient arguments are given to the command before
+         * we proceed.
+         */
         if (this->command_arguments.empty()) {
                 std::cerr << this->fetchCommand() << ": missing file operand"
                           << std::endl;
@@ -429,8 +425,10 @@ void FS::moveObject() {
         }
 
         std::string src_object_name;
-        // Find the parent directory of where our object is located, and the
-        // objects name.
+        /*
+         * Find the parent directory of where our object is located,
+         * and the objects name.
+         */
         Directory *source_dir =
             this->findDirPath(this->command_arguments.front(), src_object_name);
         if (source_dir == nullptr) {
@@ -440,12 +438,16 @@ void FS::moveObject() {
         if (dest_dir == nullptr) {
                 return;
         }
-        /* If the directories are the same, we attempt to move something in
+
+        /*
+         * If the directories are the same, we attempt to move something in
          * place, therefore an error is produced.
          */
         if (source_dir == dest_dir) {
-                // This is to ensure that the path appear correctly for the
-                // user.
+                /*
+                 * This is to ensure that the path appear
+                 * correctly for the user
+                 */
                 if (this->command_arguments.back().back() == '/') {
                         this->command_arguments.back().pop_back();
                 }
@@ -460,8 +462,10 @@ void FS::moveObject() {
 }
 
 void FS::copyObject() {
-        // Always check if sufficient arguments are given to the command before
-        // we proceed.
+        /*
+         * Always check if sufficient arguments are given to the command before
+         * we proceed.
+         */
         if (this->command_arguments.empty()) {
                 std::cerr << this->fetchCommand() << ": missing file operand"
                           << std::endl;
@@ -475,8 +479,11 @@ void FS::copyObject() {
         }
 
         std::string src_object_name;
-        // Find the parent directory of where our object is located, and the
-        // objects name.
+
+        /*
+         * Find the parent directory of where our object is located,
+         * and the objects name.
+         */
         Directory *source_dir =
             this->findDirPath(this->command_arguments.front(), src_object_name);
         if (source_dir == nullptr) {
@@ -487,12 +494,16 @@ void FS::copyObject() {
                 return;
         }
 
-        /* If the directories are the same, we attempt to move something in
+        /*
+         * If the directories are the same, we attempt to move something in
          * place, therefore an error is produced.
          */
         if (source_dir == dest_dir) {
-                // This is to ensure that the path appear correctly for the
-                // user.
+
+                /*
+                 * This is to ensure that the path appear
+                 * correctly for the user
+                 */
                 if (this->command_arguments.back().back() == '/') {
                         this->command_arguments.back().pop_back();
                 }

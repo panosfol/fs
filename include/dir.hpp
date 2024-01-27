@@ -26,13 +26,10 @@ private:
 
         template <class Ar> void serialize(Ar &ar, unsigned) {
                 ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FileObject) &
-                    BOOST_NVP(num_of_contents) & BOOST_NVP(size_of_contents) &
                     BOOST_NVP(contents);
         }
 
         std::unordered_map<std::string, std::unique_ptr<FileObject>> contents;
-        int num_of_contents;
-        int size_of_contents;
 
 public:
         Directory() = default;            // for deserialization
@@ -52,8 +49,6 @@ public:
         void copyContent(Directory *, std::string);
 
         void listContents();
-        int getNumContents();
-        int getSizeOfContents();
 
         int checkObjName(std::string);
         /*

@@ -24,18 +24,17 @@ private:
         void serialize(Archive &ar, const unsigned int) {
                 ar &BOOST_SERIALIZATION_BASE_OBJECT_NVP(FileObject);
                 ar &BOOST_NVP(content);
-                ar &BOOST_NVP(size);
         }
 
 protected:
         std::string content;
-        int size;
 
 public:
         File(){};
         File(std::string, filetype file_type, Directory *parent_dir);
 
 	void writeToFile();
+
 	void setContent(std::string);
 	std::string getContent();
 	void printContent();

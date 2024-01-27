@@ -1,20 +1,11 @@
 #include "dir.hpp"
 #include "file-object.hpp"
 
-Directory::Directory(std::string name, filetype type) : FileObject(name, type) {
-        time_t now = time(0);
-        this->date_of_creation = ctime(&now);
-        this->num_of_contents = 0;
-        this->size_of_contents = 0;
-};
+Directory::Directory(std::string name, filetype type)
+    : FileObject(name, type){};
 
 Directory::Directory(std::string name, filetype type, Directory *parent_dir)
-    : FileObject(name, type, parent_dir) {
-        time_t now = time(0);
-        this->date_of_creation = ctime(&now);
-        this->num_of_contents = 0;
-        this->size_of_contents = 0;
-};
+    : FileObject(name, type, parent_dir){};
 
 FileObject *Directory::findOneContent(std::string name) {
         auto it = this->contents.find(name);
@@ -30,19 +21,13 @@ Directory::getContents() {
 }
 
 void Directory::insertContent(std::unique_ptr<FileObject> object) {
-        auto [it, ok] =
-            this->contents.emplace(object->getName(), std::move(object));
-        if (ok) {
-                this->num_of_contents++;
-        }
+        this->contents.emplace(object->getName(), std::move(object));
 }
 
 void Directory::removeContent(std::string name) {
         if (!this->contents.erase(name)) {
                 std::cerr << "rm: cannot remove '" << name
                           << "': No such file or directory" << std::endl;
-        } else {
-                this->num_of_contents--;
         }
 }
 
@@ -58,10 +43,6 @@ void Directory::listContents() {
                 }
         }
 }
-
-int Directory::getNumContents() { return this->num_of_contents; }
-
-int Directory::getSizeOfContents() { return this->size_of_contents; }
 
 /*
  *  checkObjName
@@ -127,15 +108,17 @@ void Directory::moveDirectory(Directory *dest_dir, std::string dir_name) {
         std::unordered_map<std::string, std::unique_ptr<FileObject>> &contents =
             dest_dir->getContents();
 
-        // We have already checked if the source dir has the directory. Now
-        // check for dest_dir.
+        /*
+         * We have already checked if the source dir has the file.
+         * Now check for dest_dir.
+         */
         auto source_dir_it = this->contents.find(dir_name);
         auto dest_dir_it = contents.find(dir_name);
 
         /*
          * There are 4 possible cases that are covered here:
          * 1. We move our source directory into a target directory, and we have
-         * 0 conflicts.
+         * zero conflicts.
          * 2. We move the source directory into a target directory, and our
          * target has a file with the same name, therefore we produce an error.
          * 3. We move our source directory into a target directory, and out
@@ -203,8 +186,10 @@ void Directory::moveFile(Directory *dest_dir, std::string file_name) {
         std::unordered_map<std::string, std::unique_ptr<FileObject>> &contents =
             dest_dir->getContents();
 
-        // We have already checked if the source dir has the file. Now check for
-        // dest_dir.
+        /*
+         * We have already checked if the source dir has the file.
+         * Now check for dest_dir.
+         */
         auto source_file_it = this->contents.find(file_name);
         auto dest_dir_it = contents.find(file_name);
 
@@ -251,7 +236,8 @@ void Directory::changeAbsPathOfContentDirs() {
 }
 
 void Directory::copyContent(Directory *dest_dir, std::string obj_name) {
-        /* Find the object inside our source directory, and if found check if
+        /*
+         * Find the object inside our source directory, and if found check if
          * it is of type FSFILE. If not produce an error.
          */
         auto it_source = this->contents.find(obj_name);

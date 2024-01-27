@@ -11,22 +11,7 @@
 #define SAVEFILE "fs_save.xml"
 
 // The commands that are currently supported
-enum commands {
-        CD,
-        LS,
-        MKDIR,
-        TOUCH,
-        RM,
-        MV,
-        CP,
-        CAT,
-        FIND,
-        INFO,
-        EXIT,
-        HELP,
-        ERROR,
-        DEFAULT
-};
+enum commands { CD, LS, MKDIR, TOUCH, RM, MV, CP, CAT, EXIT, ERROR, DEFAULT };
 
 class FS {
 public:
